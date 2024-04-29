@@ -1,56 +1,65 @@
 '''
+Autores:
+Joaquin Gomez  - 24000172 
+Adrian Orantes - 24002878 
+
 NOTA IMPORTANTE: en todo el codigo se utilizan colores, \033[ es el codigo de escape de colores en la terminal
 tambien utilizamos f-strings para concatenar strings y variables por que creemos que es mas legible asi.
 '''
 
 import math
 
+# naranja = \033[93m 
+# azul = \033[94m
+# verde = \033[92m
+# rojo = \033[91m
+# reset = \033[0m
 
 #variables de texto(para tener el codigo mas limpio y ordenado) no utilizo constantes para no utilizar memoria innecesaria
 welcome = '''
 \033[94m 
 .————————————( TextCalc )————————————.
-| \033[0mBy: Joaquin Gomez & Adrian Orantes\033[94m |
-| \033[93m    Ingresa "help" para ayuda\033[94m      |  
+|\033[0m  By: Joaquin Gomez  - 24000172     \033[94m| 
+|\033[0m      Adrian Orantes - 24002878     \033[94m|
+|\033[93m     "quit" para salir              \033[94m|
+|\033[93m     "help" para ayuda              \033[94m|  
 '————————————————————————————————————'\033[0m
 
 '''
-bye = "Saliendo...\nGracias por usar TextCalc."
-help = '''
-Para usar esta calculadora, ingresa expresiones en el siguiente formato:
+bye = '''\033[93m
+Saliendo...
+Gracias por usar TexxtCalc.\033[0m'''
+help = '''\033[93mAyuda de TextCalc \033[0m
+\033[92mOperaciones validas:\033[0m
+Suma: (+ [expresion] [expresion])
+Resta: (- [expresion] [expresion])
+Multiplicacion: (* [expresion] [expresion])
+Division: (/ [expresion] [expresion])
+Raiz cuadrada: (sqroot [expresion])
+Cuadrado: (sqr [expresion])
+Seno: (sin [expresion])
+Coseno: (cos [expresion])
+Tangente: (tan [expresion])
 
-Operaciones válidas:
-- Suma: (+ [expresión] [expresión])
-- Resta: (- [expresión] [expresión])
-- Multiplicación: (* [expresión] [expresión])
-- División: (/ [expresión] [expresión])
-- Raíz cuadrada: (sqroot [expresión])
-- Cuadrado: (sqr [expresión])
-- Seno: (sin [expresión])
-- Coseno: (cos [expresión])
-- Tangente: (tan [expresión])
-
-Formato de expresiones:
-- [expresión] puede ser un número entero, decimal o una expresión compuesta entre paréntesis.
-- Los números negativos no llevan paréntesis.
-- Las expresiones compuestas deben llevar paréntesis.
-
-Ejemplos:
-- Suma: (+ 4 5)
-- Raíz cuadrada: (sqroot 64)
-- Operaciones compuestas: (+ 4 (sqroot 64))
-
-Recuerda que las expresiones deben estar correctamente escritas y en el formato especificado.
+\033[92mFormato de expresiones:\033[0m
+-[expresion] puede ser un numero entero, decimal o una expresion compuesta entre parentesis.
+-Los numeros negativos no llevan parentesis.
+-Las expresiones compuestas deben llevar parentesis. Operaciones compuestas: (+ 4 (sqroot 64))
+-Las expresiones deben estar correctamente escritas
+y en el formato especificado
 '''
+
 
 
 def RESULT(expression): #funciones para imprimir los resultados y errores
     print(f"\033[92m  resultado >>\033[0m {expression}")
 
 
+
 def ERROR(error = "La sintaxis no es correcta"):#funcion para imprimir errores 
     print(f'\033[91m  ERROR! {error}\033[0m')
     
+
 
 def is_number(num, return_number = False): #funcion para verificar que sea un numero
     try: #si no es un numero entero, intenta convertirlo a decimal
@@ -65,6 +74,7 @@ def is_number(num, return_number = False): #funcion para verificar que sea un nu
         return num
     
     return is_number
+
 
 
 def contar_parentesis(expresion, tipo): #funcion para contar los parentesis
@@ -91,6 +101,7 @@ def contar_parentesis(expresion, tipo): #funcion para contar los parentesis
             i -= 1
     
     return parentesis
+
 
 
 def validar_parentesis(expresion): #funcion para verificar que los parentesis esten bien
@@ -125,6 +136,7 @@ def validar_parentesis(expresion): #funcion para verificar que los parentesis es
     return True
 
 
+
 def operador_valido(operador): #funcion para verificar que el operador sea valido
     operador = operador.replace("(", "")
     lista_operaciones = ["+","-","*","/","^","sqroot","sqr","sin","cos","tan","div","%","!"]
@@ -133,18 +145,26 @@ def operador_valido(operador): #funcion para verificar que el operador sea valid
     return True
 
 
+
 def factorial(num): #funcion para calcular el factorial
     if num == 0:
         return 1
     return num * factorial(num-1)
 
 
+
 def one_number_operation(operador,num=None): #funcion para operaciones con un solo numero
+    #errores de operaciones
     if operador == "sqroot":
         if num < 0:
             ERROR("No se puede sacar la raiz cuadrada de un numero negativo")
             return
         return(math.sqrt(num))
+    if operador == "tan" and num == 90:
+        ERROR("No se puede calcular la tangente de 90 grados")
+        return
+    
+    #operaciones
     if operador == "sqr":
         return(num**2)
     if operador == "sin":
@@ -157,12 +177,14 @@ def one_number_operation(operador,num=None): #funcion para operaciones con un so
         return factorial(num)
 
 
+
 def two_number_operation(operador,num1=None, num2=None): #funcion para operaciones con dos numeros
     #errores de division
     if num2 == 0 and (operador == "/" or operador == "div" or operador == "%"):
         ERROR("Division entre 0")
         return False
 
+    #operaciones
     if operador == "+":
         return(num1+num2)
     if operador == "-":
@@ -176,6 +198,7 @@ def two_number_operation(operador,num1=None, num2=None): #funcion para operacion
     if operador == "%":
         return(num1%num2)
     
+
 
 def operar(operador,expresion): #funcion para calcular la operacion
     numbers = []
@@ -193,6 +216,7 @@ def operar(operador,expresion): #funcion para calcular la operacion
     else:
         ERROR("No se ingresaron suficientes numeros")
         return False
+
 
 
 def evaluar_expresion(expresion): #funcion para evaluar la expresion
@@ -259,7 +283,6 @@ def calculator(calc_input): #funcion principal de la calculadora
         else:
             ERROR()
                 
-
 
 
 def main():
