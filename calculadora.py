@@ -1,51 +1,5 @@
 import math
-'''
-NOTA IMPORTANTE: en todo el codigo se utilizan colores, \033[ es el codigo de escape de colores en la terminal
-tambien utilizamos f-strings para concatenar strings y variables por que creemos que es mas legible asi.
-'''
-
-#constantes (para tener el codigo mas limpio y ordenado)
-WELCOME = '''
-\033[94m 
-.————————————( TextCalc )————————————.
-| \033[0mBy: Joaquin Gomez & Adrian Orantes\033[94m |
-| \033[93m    Ingresa "help" para ayuda\033[94m      |  
-'————————————————————————————————————'\033[0m
-
-'''
-BYE = "Saliendo...\nGracias por usar TextCalc."
-HELP = '''
-Para usar esta calculadora, ingresa expresiones en el siguiente formato:
-
-Operaciones válidas:
-- Suma: (+ [expresión] [expresión])
-- Resta: (- [expresión] [expresión])
-- Multiplicación: (* [expresión] [expresión])
-- División: (/ [expresión] [expresión])
-- Raíz cuadrada: (sqroot [expresión])
-- Cuadrado: (sqr [expresión])
-- Seno: (sin [expresión])
-- Coseno: (cos [expresión])
-- Tangente: (tan [expresión])
-
-Formato de expresiones:
-- [expresión] puede ser un número entero, decimal o una expresión compuesta entre paréntesis.
-- Los números negativos no llevan paréntesis.
-- Las expresiones compuestas deben llevar paréntesis.
-
-Ejemplos:
-- Suma: (+ 4 5)
-- Raíz cuadrada: (sqroot 64)
-- Operaciones compuestas: (+ 4 (sqroot 64))
-
-Recuerda que las expresiones deben estar correctamente escritas y en el formato especificado.
-'''
-
-def RESULT(expression): #funciones para imprimir los resultados y errores
-    print(f"\033[92m  resultado >>\033[0m {expression}")
-
-def ERROR(error = "La sintaxis no es correcta"):#funcion para imprimir errores 
-    print(f'\033[91m  ERROR! {error}\033[0m')
+from constants import *
     
 
 def is_number(num, return_number = False): #funcion para verificar que sea un numero
@@ -123,54 +77,59 @@ def one_number_operation(operador,num=None): #funcion para operaciones con un so
         if num < 0:
             ERROR("No se puede sacar la raiz cuadrada de un numero negativo")
             return
-        RESULT(math.sqrt(num))
+        return(math.sqrt(num))
     if operador == "sqr":
-        RESULT(num**2)
+        return(num**2)
     if operador == "sin":
-        RESULT(math.sin(num))
+        return(math.sin(num))
     if operador == "cos":
-        RESULT(math.cos(num))
+        return(math.cos(num))
     if operador == "tan":
-        RESULT(math.tan(num))
+        return(math.tan(num))
+    if operador == "!":
+        pass
     
 def two_number_operation(operador,num1=None, num2=None): #funcion para operaciones con dos numeros
-    if operador == "+":
-        RESULT(num1+num2)
-    if operador == "-":
-        RESULT(num1-num2)
-    if operador == "*":
-        RESULT(num1*num2)
-    if operador == "/":
-        if num2 == 0:
-            ERROR("Division entre 0")
-            return
-        RESULT(num1/num2)
+    #errores de division
+    if num2 == 0 and (operador == "/" or operador == "div" or operador == "%"):
+        ERROR("Division entre 0")
+        return False
 
-def unique_operation(operador,num1,num2): #funcion para operaciones unicas
+    if operador == "+":
+        return(num1+num2)
+    if operador == "-":
+        return(num1-num2)
+    if operador == "*":
+        return(num1*num2)
+    if operador == "/":
+        return(num1/num2)
     if operador == "div":
         pass
     if operador == "%":
         pass
-    if operador == "!":
-        pass
-     
+    
+
+  
 
 
 def operar(operador,expresion): #funcion para calcular la operacion
-    print (expresion)
     numbers = []
     for number in expresion:
         if not is_number(number):
             ERROR(f'"{number}" no es un numero')
-            return
+            return False
         else:
             numbers.append(is_number(number, True)) 
+
     if len(numbers) == 1:
-        one_number_operation(operador,numbers[0])
-    if len(numbers) == 2:
-        two_number_operation(operador,numbers[0],numbers[1])
-    if len(numbers) == 3:
-        unique_operation(operador,numbers[0],numbers[1],numbers[2])
+        return one_number_operation(operador,numbers[0])
+    elif len(numbers)>1:
+        return two_number_operation(operador,numbers[0],numbers[1])
+    else:
+        ERROR("No se ingresaron suficientes numeros")
+        return False
+
+
 
 def evaluar_expresion(expresion): #funcion para evaluar la expresion
     lista_expresion = expresion.split(" ") #separa la expresion en una lista
@@ -182,11 +141,28 @@ def evaluar_expresion(expresion): #funcion para evaluar la expresion
     if contar_parentesis(expresion,"abiertos") == 1 and operador_valido(lista_expresion[0]): 
         operador = lista_expresion[0].replace("(", "")#se obtiene el operador
         lista_expresion[-1] = lista_expresion[-1].replace(")", "")#se obtiene el segundo numero sin parentesis
-        operar(operador,lista_expresion[1:])
+        res = operar(operador,lista_expresion[1:])
+        return (res)
+    
 
-    else:
-        ERROR("XD")
-        return
+    elif contar_parentesis(expresion,"abiertos") > 1:
+        cantidad_parentesis = contar_parentesis(expresion,"abiertos")
+        temp_results = []
+        for i in range(cantidad_parentesis,0,-1):
+            print('expresion',expresion)
+            temp_expression = ""
+            contador = 0
+            for letra in expresion:
+                if letra == "(":
+                    contador += 1
+                if contador == i:
+                    temp_expression += letra
+                    if letra == ")":
+                        temp_results.append(evaluar_expresion(temp_expression))
+                        expresion = expresion.replace(temp_expression,str(temp_results[-1]))#se reemplaza la expresion por el resultado
+                        break
+
+        return temp_results[-1] #se devuelve el resultado de la ultima operacion
 
 
 
@@ -205,7 +181,7 @@ def calculator(calc_input): #funcion principal de la calculadora
     
     if(validar_parentesis(calc_input)): #verificar los parentesis   
         if calc_input[0]=="(" and calc_input[-1]==")": #se verifica si es una expresion y se evalua
-            evaluar_expresion(calc_input)
+            RESULT(evaluar_expresion(calc_input))
 
         elif (calc_input[0]!="(") and (calc_input[-1]!=")"):#si no tiene parentesis verifica si es numero y lo devuleve
             if not is_number(calc_input): 
